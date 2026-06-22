@@ -139,6 +139,15 @@ Keycloak предоставляет стандартные OIDC-эндпоинт
 
 Регистрация пользователей — через Keycloak Admin Console (`http://localhost:9090/admin`) или Admin REST API.
 
+### cargo-service `/api/v1/warehouse`
+
+| Метод  | Путь    | Описание       |
+|--------|---------|----------------|
+| POST   | `/`     | Создать склад  |
+| GET    | `/`     | Список складов |
+| GET    | `/{id}` | Склад по id    |
+| DELETE | `/{id}` | Удалить склад  |
+
 ### cargo-service `/api/v1/cargo`
 
 | Метод  | Путь    | Описание      |
@@ -256,14 +265,28 @@ Client ──► Keycloak ──► JWT ──► API Gateway ──► Microser
 
 ### cargo-service → схема `cargo`
 
-**Таблица `cargo`**
+**Таблица `warehouse`**
 
 | Колонка       | Тип            | Ограничения             |
 |---------------|----------------|-------------------------|
 | `id`          | UUID           | PK, NOT NULL            |
-| `description` | VARCHAR(500)   | NOT NULL                |
-| `weight_kg`   | DECIMAL(10, 2) | NOT NULL, CHECK (> 0)   |
+| `name`        | VARCHAR(200)   | NOT NULL                |
+| `address`     | TEXT           | NOT NULL                |
+| `city`        | VARCHAR(100)   | NOT NULL                |
+| `capacity_kg` | DECIMAL(10, 2) | NOT NULL, CHECK (> 0)   |
 | `created_at`  | TIMESTAMP      | NOT NULL, DEFAULT NOW() |
+
+**Таблица `cargo`**
+
+| Колонка        | Тип            | Ограничения                   |
+|----------------|----------------|-------------------------------|
+| `id`           | UUID           | PK, NOT NULL                  |
+| `warehouse_id` | UUID           | NOT NULL, FK → `warehouse.id` |
+| `name`         | VARCHAR(200)   | NOT NULL                      |
+| `description`  | VARCHAR(500)   | NULLABLE                      |
+| `quantity`     | INT            | NOT NULL, CHECK (> 0)         |
+| `weight_kg`    | DECIMAL(10, 2) | NOT NULL, CHECK (> 0)         |
+| `created_at`   | TIMESTAMP      | NOT NULL, DEFAULT NOW()       |
 
 ---
 
@@ -276,6 +299,7 @@ Client ──► Keycloak ──► JWT ──► API Gateway ──► Microser
 | `id`          | UUID           | PK, NOT NULL                        |
 | `type`        | VARCHAR(50)    | NOT NULL (TRUCK / VAN / MOTORCYCLE) |
 | `model`       | VARCHAR(200)   | NOT NULL                            |
+| `notes`       | VARCHAR(300)   | NULLABLE                            |
 | `capacity_kg` | DECIMAL(10, 2) | NOT NULL, CHECK (> 0)               |
 | `status`      | ENUM           | NOT NULL, DEFAULT 'AVAILABLE'       |
 | `created_at`  | TIMESTAMP      | NOT NULL, DEFAULT NOW()             |
@@ -293,7 +317,6 @@ Enum `TransportStatus`: `AVAILABLE`, `IN_USE`, `MAINTENANCE`
 | `id`                  | UUID           | PK, NOT NULL                           |
 | `cargo_id`            | UUID           | NOT NULL (ссылка на cargo-service)     |
 | `transport_id`        | UUID           | NULLABLE (ссылка на transport-service) |
-| `sender_name`         | VARCHAR(200)   | NOT NULL                               |
 | `recipient_name`      | VARCHAR(200)   | NOT NULL                               |
 | `recipient_email`     | VARCHAR(200)   | NOT NULL                               |
 | `recipient_phone`     | VARCHAR(20)    | NULLABLE                               |
@@ -317,7 +340,6 @@ Enum `DeliveryStatus`: `CREATED`, `STORED`, `IN_TRANSIT`, `DELIVERED`, `CANCELLE
 |-------------------|----------------|------------------|
 | `id`              | UUID           | PK, NOT NULL     |
 | `delivery_id`     | UUID           | NOT NULL, UNIQUE |
-| `order_ref`       | VARCHAR(100)   | NULLABLE         |
 | `status`          | VARCHAR(20)    | NOT NULL         |
 | `cost`            | DECIMAL(19, 2) | NOT NULL         |
 | `recipient_email` | VARCHAR(200)   | NULLABLE         |
@@ -379,6 +401,10 @@ Keycloak realm `logistics` содержит 3 роли:
 
 | Эндпоинт                              | CLIENT | MANAGER | ADMIN |
 |---------------------------------------|--------|---------|-------|
+| `GET /api/v1/warehouse`               | ✓      | ✓       | ✓     |
+| `GET /api/v1/warehouse/{id}`          | ✓      | ✓       | ✓     |
+| `POST /api/v1/warehouse`              |        |         | ✓     |
+| `DELETE /api/v1/warehouse/{id}`       |        |         | ✓     |
 | `GET /api/v1/cargo`                   | ✓      | ✓       | ✓     |
 | `GET /api/v1/cargo/{id}`              | ✓      | ✓       | ✓     |
 | `POST /api/v1/cargo`                  |        | ✓       | ✓     |
