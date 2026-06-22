@@ -391,11 +391,11 @@ transport-service ──► transport.status-changed ──► delivery-service
 
 Keycloak realm `logistics` содержит 3 роли:
 
-| Роль           | Кто                                   |
-|----------------|---------------------------------------|
-| `ROLE_ADMIN`   | Администратор системы                 |
-| `ROLE_MANAGER` | Логист / менеджер по доставкам        |
-| `ROLE_CLIENT`  | Клиент (отправитель/получатель груза) |
+| Роль           | Кто                            |
+|----------------|--------------------------------|
+| `ROLE_ADMIN`   | Администратор системы          |
+| `ROLE_MANAGER` | Логист / менеджер по доставкам |
+| `ROLE_CLIENT`  | Клиент (получатель груза)      |
 
 ### Матрица прав
 
@@ -419,5 +419,3 @@ Keycloak realm `logistics` содержит 3 роли:
 | `PATCH /api/v1/delivery/{id}/status`  |        | ✓       | ✓     |
 | `DELETE /api/v1/delivery/{id}/cancel` | ✓      | ✓       | ✓     |
 | `GET /api/v1/report/**`               |        | ✓       | ✓     |
-
-> ROLE_CLIENT создаёт доставки и отменяет свои. Статусы меняет только MANAGER/ADMIN.
